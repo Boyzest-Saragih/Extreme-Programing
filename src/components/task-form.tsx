@@ -2,13 +2,7 @@
 
 import type React from "react"
 import { useState } from "react"
-
-interface TaskFormData {
-  title: string
-  description: string
-  priority: string
-  status: string
-}
+import type { TaskFormData } from "../types/task"
 
 interface TaskFormProps {
   onSubmit?: (data: TaskFormData) => void
@@ -18,8 +12,8 @@ export default function TaskForm({ onSubmit }: TaskFormProps) {
   const [formData, setFormData] = useState<TaskFormData>({
     title: "",
     description: "",
-    priority: "",
-    status: "",
+    priority: "" as any, // Will be validated before submission
+    status: "" as any, // Will be validated before submission
   })
 
   const handleInputChange = (field: keyof TaskFormData, value: string) => {
@@ -48,11 +42,19 @@ export default function TaskForm({ onSubmit }: TaskFormProps) {
       return
     }
 
+    // Type assertion is safe here because we've validated the values
+    const validatedData: TaskFormData = {
+      title: formData.title.trim(),
+      description: formData.description,
+      priority: formData.priority as "high" | "medium" | "low",
+      status: formData.status as "to-do" | "in-progress" | "done",
+    }
+
     // Call the onSubmit prop if provided, otherwise use default behavior
     if (onSubmit) {
-      onSubmit(formData)
+      onSubmit(validatedData)
     } else {
-      console.log("Task submitted:", formData)
+      console.log("Task submitted:", validatedData)
       alert("Task added successfully!")
     }
 
@@ -60,8 +62,8 @@ export default function TaskForm({ onSubmit }: TaskFormProps) {
     setFormData({
       title: "",
       description: "",
-      priority: "",
-      status: "",
+      priority: "" as any,
+      status: "" as any,
     })
   }
 
