@@ -20,6 +20,10 @@ export default function App() {
     setTasks((prevTasks) => prevTasks.map((task) => (task.id === taskId ? { ...task, ...updatedTask } : task)))
   }
 
+  const handleDeleteTask = (taskId: string) => {
+    setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId))
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
       <div className="max-w-6xl mx-auto">
@@ -36,7 +40,7 @@ export default function App() {
 
           {/* Task List */}
           <div>
-            <TaskList tasks={tasks} onUpdateTask={handleUpdateTask} />
+            <TaskList tasks={tasks} onUpdateTask={handleUpdateTask} onDeleteTask={handleDeleteTask} />
           </div>
         </div>
       </div>
