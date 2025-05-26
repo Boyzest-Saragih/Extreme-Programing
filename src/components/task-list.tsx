@@ -118,7 +118,7 @@ export default function TaskList({ tasks }: TaskListProps) {
                         data-testid={`status-${task.status}`}
                       >
                         {getStatusIcon(task.status)}
-                        {task.status === "to-do" ? "To-Do" : task.status === "in-progress" ? "In Progress" : "Done"}
+                        {task.status === "to-do" ? "To-Do" : task.status === "done" ? "In Progress" : "Done"}
                       </span>
                     </div>
                   </div>
