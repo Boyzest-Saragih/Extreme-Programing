@@ -16,9 +16,13 @@ export default function App() {
     setTasks((prevTasks) => [...prevTasks, newTask])
   }
 
+  const handleUpdateTask = (taskId: string, updatedTask: Omit<Task, "id">) => {
+    setTasks((prevTasks) => prevTasks.map((task) => (task.id === taskId ? { ...task, ...updatedTask } : task)))
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Task Manager</h1>
           <p className="text-gray-600 mt-2">Manage your tasks efficiently</p>
@@ -32,11 +36,10 @@ export default function App() {
 
           {/* Task List */}
           <div>
-            <TaskList tasks={tasks} />
+            <TaskList tasks={tasks} onUpdateTask={handleUpdateTask} />
           </div>
         </div>
       </div>
     </div>
   )
 }
-
