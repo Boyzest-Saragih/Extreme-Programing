@@ -1,17 +1,17 @@
 "use client"
 
-import { useState } from "react"
 import TaskForm from "./components/task-form"
 import TaskList from "./components/task-list"
 import type { Task, TaskFormData } from "./types/task"
+import { useLocalStorage } from "./hooks/use-local-storage"
 
-export default function App() {
-  const [tasks, setTasks] = useState<Task[]>([])
+export default function Home() {
+  const [tasks, setTasks] = useLocalStorage<Task[]>("tasks", [])
 
   const handleAddTask = (taskData: TaskFormData) => {
     const newTask: Task = {
       ...taskData,
-      id: Date.now().toString(), // Simple ID generation
+      id: Date.now().toString(), 
     }
     setTasks((prevTasks) => [...prevTasks, newTask])
   }
@@ -20,8 +20,14 @@ export default function App() {
     setTasks((prevTasks) => prevTasks.map((task) => (task.id === taskId ? { ...task, ...updatedTask } : task)))
   }
 
-  const handleDeleteTask = (taskId: string) => {
+    const handleDeleteTask = (taskId: string) => {
     setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId))
+  }
+
+  const handleClearAllTasks = () => {
+    if (window.confirm("Are you sure you want to clear all tasks? This action cannot be undone.")) {
+      setTasks([])
+    }
   }
 
   return (
@@ -30,6 +36,7 @@ export default function App() {
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Task Manager</h1>
           <p className="text-gray-600 mt-2">Manage your tasks efficiently</p>
+          <p className="text-sm text-gray-500 mt-1">Your tasks are automatically saved to your browser</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -41,9 +48,25 @@ export default function App() {
           {/* Task List */}
           <div>
             <TaskList tasks={tasks} onUpdateTask={handleUpdateTask} onDeleteTask={handleDeleteTask} />
+
+            {/* Clear All Button */}
+            {tasks.length > 0 && (
+              <div className="mt-4 text-center">
+                <button
+                  onClick={handleClearAllTasks}
+                  className="px-4 py-2 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors"
+                  data-testid="clear-all-button"
+                >
+                  Clear All Tasks
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
     </div>
   )
 }
+
+
+
