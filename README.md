@@ -1,3 +1,14 @@
+# 👋 Hi, We're **Kelompok 10**  
+🚀 **Tugas pengembangan perangkat lunak**  
+
+## 👥 Team Members
+| <img src="https://media.stickerswiki.app/moyai_stones/2014977.512.webp" width="100" alt="Dedi"> | <img src="https://media.stickerswiki.app/moyai_stones/2014979.512.webp" width="100" alt="Enjel"> | <img src="https://media.stickerswiki.app/moyai_stones/2014975.512.webp" width="100" alt="Matthew"> |
+|----------|----------|----------|
+| **Dedi Sanjaya Nainggolan** | **Enjel Boyzest Saragih** | **Matthew Rivandy** |
+
+---
+
+
 ## 📋 User Stories
 
 | No | User Story                                                                                         | Story Point | Prioritas |
