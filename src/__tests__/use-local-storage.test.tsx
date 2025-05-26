@@ -2,6 +2,7 @@
 import { renderHook, act } from "@testing-library/react"
 import "@testing-library/jest-dom"
 import { useLocalStorage } from "../hooks/use-local-storage"
+import type { Task } from "../types/task"
 import { jest } from "@jest/globals"
 
 // Mock localStorage
@@ -113,14 +114,14 @@ describe("useLocalStorage", () => {
   })
 
   it("works with arrays", () => {
-    const initialTasks = [
-      { id: "1", title: "Task 1", description: "", priority: "high" as const, status: "to-do" as const },
-      { id: "2", title: "Task 2", description: "", priority: "low" as const, status: "done" as const },
+    const initialTasks: Task[] = [
+      { id: "1", title: "Task 1", description: "", priority: "high", status: "to-do" },
+      { id: "2", title: "Task 2", description: "", priority: "low", status: "done" },
     ]
 
     const { result } = renderHook(() => useLocalStorage("tasks", initialTasks))
 
-    const newTask = { id: "3", title: "Task 3", description: "", priority: "medium" as const, status: "to-do" as const }
+    const newTask: Task = { id: "3", title: "Task 3", description: "", priority: "medium", status: "to-do" }
 
     act(() => {
       result.current[1]((prev) => [...prev, newTask])
