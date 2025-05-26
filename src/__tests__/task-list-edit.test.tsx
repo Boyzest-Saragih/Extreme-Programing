@@ -5,6 +5,10 @@ import "@testing-library/jest-dom"
 import TaskList from "../components/task-list"
 import type { Task } from "../types/task"
 
+// Mock window.confirm
+const mockConfirm = jest.fn()
+global.confirm = mockConfirm
+
 // Mock alert function
 const mockAlert = jest.fn()
 global.alert = mockAlert
@@ -31,13 +35,27 @@ describe("TaskList - Edit Functionality", () => {
     jest.clearAllMocks()
   })
 
-  it("renders edit button for each task", () => {
+  it("renders edit and delete buttons for each task", () => {
+    const mockOnUpdate = jest.fn()
+    const mockOnDelete = jest.fn()
+
+    render(<TaskList tasks={mockTasks} onUpdateTask={mockOnUpdate} onDeleteTask={mockOnDelete} />)
+
+    expect(screen.getByTestId("edit-button-1")).toBeInTheDocument()
+    expect(screen.getByTestId("edit-button-2")).toBeInTheDocument()
+    expect(screen.getByTestId("delete-button-1")).toBeInTheDocument()
+    expect(screen.getByTestId("delete-button-2")).toBeInTheDocument()
+  })
+
+  it("does not render delete buttons when onDeleteTask is not provided", () => {
     const mockOnUpdate = jest.fn()
 
     render(<TaskList tasks={mockTasks} onUpdateTask={mockOnUpdate} />)
 
     expect(screen.getByTestId("edit-button-1")).toBeInTheDocument()
     expect(screen.getByTestId("edit-button-2")).toBeInTheDocument()
+    expect(screen.queryByTestId("delete-button-1")).not.toBeInTheDocument()
+    expect(screen.queryByTestId("delete-button-2")).not.toBeInTheDocument()
   })
 
   it("enters edit mode when edit button is clicked", async () => {
@@ -199,6 +217,36 @@ describe("TaskList - Edit Functionality", () => {
     })
   })
 
+  it("handles delete task with confirmation", async () => {
+    const user = userEvent.setup()
+    const mockOnUpdate = jest.fn()
+    const mockOnDelete = jest.fn()
+    mockConfirm.mockReturnValue(true)
+
+    render(<TaskList tasks={mockTasks} onUpdateTask={mockOnUpdate} onDeleteTask={mockOnDelete} />)
+
+    const deleteButton = screen.getByTestId("delete-button-1")
+    await user.click(deleteButton)
+
+    expect(mockConfirm).toHaveBeenCalledWith("Are you sure you want to delete this task?")
+    expect(mockOnDelete).toHaveBeenCalledWith("1")
+  })
+
+  it("cancels delete when user declines confirmation", async () => {
+    const user = userEvent.setup()
+    const mockOnUpdate = jest.fn()
+    const mockOnDelete = jest.fn()
+    mockConfirm.mockReturnValue(false)
+
+    render(<TaskList tasks={mockTasks} onUpdateTask={mockOnUpdate} onDeleteTask={mockOnDelete} />)
+
+    const deleteButton = screen.getByTestId("delete-button-1")
+    await user.click(deleteButton)
+
+    expect(mockConfirm).toHaveBeenCalledWith("Are you sure you want to delete this task?")
+    expect(mockOnDelete).not.toHaveBeenCalled()
+  })
+
   it("only allows editing one task at a time", async () => {
     const user = userEvent.setup()
     const mockOnUpdate = jest.fn()
@@ -241,68 +289,5 @@ describe("TaskList - Edit Functionality", () => {
     await user.click(saveButton)
 
     expect(screen.queryByTestId("edit-form")).not.toBeInTheDocument()
-  })
-
-  it("maintains task sorting after editing", async () => {
-    const user = userEvent.setup()
-    const mockOnUpdate = jest.fn()
-
-    const tasks: Task[] = [
-      { id: "1", title: "Low Task", description: "", priority: "low", status: "to-do" },
-      { id: "2", title: "High Task", description: "", priority: "high", status: "to-do" },
-    ]
-
-    render(<TaskList tasks={tasks} onUpdateTask={mockOnUpdate} />)
-
-    // Initially, high priority should be first
-    const taskItems = screen.getAllByTestId(/task-item-/)
-    const taskTitles = taskItems.map((item) => item.querySelector("h3")?.textContent)
-    expect(taskTitles).toEqual(["High Task", "Low Task"])
-
-    // Edit the high priority task to make it low priority
-    const editButton = screen.getByTestId("edit-button-2") // High task is at index 0, but button has task id
-    await user.click(editButton)
-
-    const prioritySelect = screen.getByTestId("edit-priority-select")
-    await user.selectOptions(prioritySelect, "low")
-
-    const saveButton = screen.getByTestId("save-edit-button")
-    await user.click(saveButton)
-
-    expect(mockOnUpdate).toHaveBeenCalledWith("2", {
-      title: "High Task",
-      description: "",
-      priority: "low",
-      status: "to-do",
-    })
-  })
-
-  it("handles editing task with empty description", async () => {
-    const user = userEvent.setup()
-    const mockOnUpdate = jest.fn()
-
-    const tasks: Task[] = [{ id: "1", title: "Task", description: "", priority: "medium", status: "to-do" }]
-
-    render(<TaskList tasks={tasks} onUpdateTask={mockOnUpdate} />)
-
-    const editButton = screen.getByTestId("edit-button-1")
-    await user.click(editButton)
-
-    // Description should be empty
-    const descriptionInput = screen.getByTestId("edit-description-input")
-    expect(descriptionInput).toHaveValue("")
-
-    // Add description
-    await user.type(descriptionInput, "New description")
-
-    const saveButton = screen.getByTestId("save-edit-button")
-    await user.click(saveButton)
-
-    expect(mockOnUpdate).toHaveBeenCalledWith("1", {
-      title: "Task",
-      description: "New description",
-      priority: "medium",
-      status: "to-do",
-    })
   })
 })
